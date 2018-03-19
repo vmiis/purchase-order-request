@@ -1,0 +1,228 @@
+<div header id=header__ID>
+    <nav id=nav__ID class="navbar navbar-expand-lg navbar-dark">
+		<div id=brand__ID>
+	        <a class="navbar-brand d-none d-lg-block" onclick="$vm.nav_load_module('website_home');">
+	            <div class=large_logo__ID>
+	                <div class=large_logo_large_label__ID>
+	                    Business Portal
+	                </div>
+	                <div class=large_logo_small_label__ID>
+	                    on-demand business applications
+	                </div>
+	            </div>
+	        </a>
+	        <a class="navbar-brand d-lg-none" onclick="$vm.nav_load_module('website_home');">
+	            <div class=small_logo__ID>Business Portal</div>
+	        </a>
+		</div>
+        <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbars__ID" aria-controls="navbars__ID" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="navbars__ID" class="navbar-collapse collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" data-toggle="collapse" data-target=".navbar-collapse.show" onclick="$vm.nav_load_module('website_home');"><i class="fa fa-home"></i> Home</a></li>
+                <li class="nav-item"><a class="nav-link" data-toggle="collapse" data-target=".navbar-collapse.show" onclick="$vm.nav_load_module('website_workflow');">Workflow</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="nav_dropdown__ID" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Staff</a>
+                    <div class="dropdown-menu" aria-labelledby="nav_dropdown__ID">
+                        <a class="dropdown-item" data-toggle="collapse" data-target=".navbar-collapse.show" onclick="$vm.nav_load_module('website_r-purchase-order-request');">My purchase order requests</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="nav_dropdown__ID" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Manager</a>
+                    <div class="dropdown-menu" aria-labelledby="nav_dropdown__ID">
+                        <a class="dropdown-item" data-toggle="collapse" data-target=".navbar-collapse.show" onclick="$vm.nav_load_module('website_a-purchase-order-request');">My purchase order approvals</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="nav_dropdown__ID" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Accountant</a>
+                    <div class="dropdown-menu" aria-labelledby="nav_dropdown__ID">
+                        <a class="dropdown-item" data-toggle="collapse" data-target=".navbar-collapse.show" onclick="$vm.nav_load_module('website_p-purchase-order-request');">Purchase order requests</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="nav_dropdown__ID" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Administrator</a>
+                    <div class="dropdown-menu" aria-labelledby="nav_dropdown__ID">
+                        <a class="dropdown-item" data-toggle="collapse" data-target=".navbar-collapse.show" onclick="$vm.nav_load_module('website_administrator-purchase-order-request-approvement');">Purchase order request approvement</a>
+                        <a class="dropdown-item" data-toggle="collapse" data-target=".navbar-collapse.show" onclick="$vm.nav_load_module('website_administrator-purchase-order-request-processing');">Purchase order request processing</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown" id=signin__ID>
+                    <a class="nav-link dropdown-toggle" id="nav_dropdown__ID" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user"></i> Sign In</a></a>
+                    <div class="dropdown-menu" aria-labelledby="nav_dropdown__ID">
+						<a class="dropdown-item" data-toggle="collapse" data-target=".navbar-collapse.show" id=google__ID >With your Google account</a>
+						<a class="dropdown-item" data-toggle="collapse" data-target=".navbar-collapse.show" id=facebook__ID >With your Facebook account</a>
+						<a class="dropdown-item" data-toggle="collapse" data-target=".navbar-collapse.show" onclick="$vm.nav_wappsystem_signin();">With your Wappsystem account</a>
+                    </div>
+                </li>
+				<li class="nav-item" id=signout__ID style='display:none'><a class="nav-link" onclick=$vm.nav_signout() ><i class="fa fa-user"></i> Sign Out</a></li>
+            </ul>
+			<form id=form__ID class="form-inline my-2 my-lg-0">
+				<input id=vm_system_search class="form-control mr-sm-2" type="text" placeholder="Search modules..." aria-label="Search modules..." />
+			</form>
+        </div>
+    </nav>
+    <script>
+        //---------------------------------------------
+		var init_loop=setInterval(function (){
+			console.log('init_loop...')
+			if($vm.init_status==1){
+				clearInterval(init_loop);
+				show_user();
+			}
+		},100);
+        //---------------------------------------------
+		var show_user=function(){
+			var third=""
+			if($vm.user_puid=="1") third=" (Google)";
+			if($vm.user_puid=="2") third=" (Facebook)";
+			if($vm.user=='guest'){
+				$('#username__ID').text('');
+				$('#signin__ID').show();
+				$('#signout__ID').hide();
+			}
+			else{
+				$('#username__ID').text('Signed in as '+ $vm.user+third);
+				$('#signin__ID').hide();
+				$('#signout__ID').show();
+			}
+		}
+		//---------------------------------------------
+        if(window.location.hostname!='127.0.0.1'){
+
+			$vm.google_signin_setup('175539446682-1gpn5bil7aoff1cnur5uev84o9e5am1c.apps.googleusercontent.com','google__ID',show_user);
+            $vm.facebook_signin_setup('360182794393427','facebook__ID',show_user);
+        }
+		//---------------------------------------------
+		if(window.innerWidth <= 800 && window.innerHeight <= 600) {
+			$('#form__ID').parent().prepend($('#form__ID'));
+		}
+		//---------------------------------------------
+		$(".navbar-nav").hide();
+		var navbars_loop=setInterval(function (){
+			if($vm.js_popper==1){
+				clearInterval(navbars_loop);
+				$(".navbar-nav").show();
+                console.log((new Date().getTime()-$vm.start_time).toString()+"---"+"********************** menu is ready ************************");
+			}
+		},100);
+		//------------------------------------
+    </script>
+    <style>
+        #header__ID{
+            background: rgba(80,80,80,0.9);
+        }
+        #header__ID a{
+            cursor:pointer;
+        }
+        #nav__ID{
+			padding:0;
+            z-index:99;
+        }
+        #navbars__ID{
+	        padding-top:30px;
+        }
+        .large_logo__ID{
+            color:#fff;
+            padding:10px 0px 10px 30px;
+        }
+        .large_logo_large_label__ID{
+            font-size:140%;
+        }
+        .large_logo_small_label__ID{
+            font-size:64%;
+        }
+        #navbars__ID{
+            padding-left:50px;
+        }
+        #form__ID{
+            padding-left:80px;
+        }
+		@media screen and (max-width:992px){
+			#nav__ID{
+	            z-index:99;
+	        }
+            #form__ID{
+		        padding-left:0px;
+	        }
+			#nav__ID{
+                padding: 3px 15px;
+			}
+            #navbars__ID{
+    	        padding-top:0px;
+                padding-left:10px;
+				background-color:#445a26;
+            }
+            .small_logo__ID{
+                color:#fff;
+                font-size: 140%;
+            }
+		}
+		/****************************/
+		#navbars__ID a:focus {
+			outline: none;
+		}
+		#navbars__ID .navbar-brand {
+			font-size: 1.1rem;
+			color: white;
+		}
+		#navbars__ID .navbar-brand.active,
+		#navbars__ID .navbar-brand:active,
+		#navbars__ID .navbar-brand:focus,
+		#navbars__ID .navbar-brand:hover {
+			color: white;
+		}
+		#navbars__ID .navbar-nav {
+			letter-spacing: 1px;
+		}
+		#navbars__ID .navbar-nav li.nav-item a.nav-link {
+			color: white;
+		}
+		#navbars__ID .navbar-nav li.nav-item a.nav-link:hover {
+			color: #18BC9C;
+			outline: none;
+		}
+		#navbars__ID .navbar-nav li.nav-item a.nav-link:active,
+		#navbars__ID .navbar-nav li.nav-item a.nav-link:focus {
+			color: white;
+		}
+		#navbars__ID .navbar-toggler {
+			font-size: 14px;
+			padding: 11px;
+			text-transform: uppercase;
+			color: white;
+			border-color: white;
+		}
+		#navbars__ID .navbar-toggler:focus,
+		#navbars__ID .navbar-toggler:hover {
+			color: white;
+			border-color: #18BC9C;
+			background-color: #18BC9C;
+		}
+		@media (min-width: 992px) {
+			#navbars__ID {
+				-webkit-transition: padding-top 0.3s, padding-bottom 0.3s;
+				-moz-transition: padding-top 0.3s, padding-bottom 0.3s;
+				transition: padding-top 0.3s, padding-bottom 0.3s;
+			}
+			#navbars__ID .navbar-brand {
+				font-size: 2em;
+				-webkit-transition: all 0.3s;
+				-moz-transition: all 0.3s;
+				transition: all 0.3s;
+			}
+			#navbars__ID .navbar-nav > li.nav-item > a.nav-link.active {
+				color: white;
+				border-radius: 3px;
+				background: #18BC9C;
+			}
+			#navbars__ID .navbar-nav > li.nav-item > a.nav-link.active:active,
+			#navbars__ID .navbar-nav > li.nav-item > a.nav-link.active:focus,
+			#navbars__ID .navbar-nav > li.nav-item > a.nav-link.active:hover {
+				color: white;
+				background: #18BC9C;
+		  	}
+		}
+		/*********************************/
+    </style>
+</div>

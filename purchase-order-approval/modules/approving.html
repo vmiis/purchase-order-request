@@ -1,0 +1,76 @@
+<section>
+    <div style='padding:30px'>
+        <br><br>
+        <div id=contents__ID>
+            <span id=info__ID></span>
+            <br><br>
+        </div>
+        <br><br>
+        <input type=button id=approve__ID class="btn btn-secondary" value='I approve the request' />
+    </div>
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+		var record;
+		var prefix=$vm.module_list[$vm.vm["__ID"].name].prefix;
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+			$('#approve__ID').show();
+			record=$vm.vm['__ID'].op.input.record;
+            var txt="Requested by "+record.Author+' on '+record.DateTime+'\r\n\r\n';
+            txt+=make_approved_info(record);;
+            $('#info__ID').html(txt.replace(/\r\n/g,'<br>'));
+        })
+        //-------------------------------------
+		var request_tid=$vm.module_list[prefix+'a-purchase-order-request'].table_id;
+		//-------------------------------------
+        $('#approve__ID').on('click',function(){
+			$('#approve__ID').hide();
+			var txt="Requested by "+record.Author+' on '+record.DateTime+'\r\n';
+			txt+="Approved by "+$vm.user+' on '+$vm.date_to_string_dmy($vm.date_today())+'\r\n\r\n';
+            txt+=make_approved_info(record);
+            var data={}
+			data.u_s_e_r_A=record.Author;
+			data.u_s_e_r_B=$vm.user;
+            data.Short_Description=record.Short_Description;
+            data.Info=txt;
+            var dbv={S1:record.Short_Description};
+            dbv.PPID=request_tid;
+            dbv.PUID=record.UID;
+            var db_pid=$vm.module_list[$vm.vm['__ID'].name]['table_id'];
+            var req={cmd:"add_json_record_s2",db_pid:db_pid,data:data,dbv:dbv};
+            $VmAPI.request({data:req,callback:function(res){
+	            $vm.nav_load_module(prefix+'a-purchase-order-email-to-accountant',$vm.root_layout_content_slot,{record:record})
+            }});
+        });
+        //-------------------------------------
+		var make_approved_info=function(record){
+			var key_list=",UID,Short_Description,Supplier_Name,Supplier_Address,Supplier_Phone,Supplier_Fax,GST_Amount,Total_Amount,";
+			var info='';
+			$.each(record,function(key,value){
+				var key1=key;
+				if(key1=='UID') key1="Purchase_Order_ID";
+				if(key_list.indexOf(','+key+',')!=-1) info+=key1.replace(/_/g,' ')+": "+value+"\r\n";
+			})
+			if(record.items!=undefined){
+				info+="\r\nItem Details:\r\n\r\n";
+				for(var i=0;i<record.items.length;i++){
+					var gst='GST:No'; if(record.items[i].GST=='1') gst='GST:Yes';
+					info+=record.items[i].Description+", "+record.items[i].Unit_Price+"(unit price), "+record.items[i].Quantity+"(quantity), "+gst+"\r\n";
+				}
+			}
+            info=info.replace(/\r\n/g,'<br>');
+            return info;
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+	#D__ID{
+		height:100%;
+		overflow:auto;
+		animation: vm_module_fadein 1.0s;
+		background-color: #fff;
+	}
+</style>

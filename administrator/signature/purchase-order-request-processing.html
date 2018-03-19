@@ -1,0 +1,37 @@
+<section>
+    VmInclude:__COMPONENT__/grid/grid.v3.html
+    An administrator can delete the request processing signature if an accountant made a wrong processing.
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__COMPONENT__/grid/grid.v3.js
+        //-------------------------------------
+        _fields="Purchase_Order_ID,Short_Description,_gridHidden|Info";
+        _fields+=",Submit Date|DateTime,Submitted by|Author,_Delete";
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            $('#new__ID').hide();
+            $('#save__ID').hide();
+            _set_req(); _request_data();
+        })
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case 'Purchase_Order_ID':
+                    records[I].vm_custom[field]=true;
+                    if(records[I].PUID!=undefined) td.text(records[I].PUID);
+                    break;
+            }
+        }
+        //-------------------------------------
+        _record_delete=function(I,rid){
+            var options={pid:'__ID',rid:rid,dbv:{}, callback:function(res,n){ _request_data(); } }
+            $vm.delete_record(options);
+        };
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.v3.css
+</style>

@@ -1,0 +1,15 @@
+{
+    "modules":
+	{
+		"a-purchase-order-request":	          	{"table_id":"20009699","url":"purchase-order-approval/modules/purchase_order.html","form_module":"a-purchase-order-request-form","name_for_search":"My purchase order approvals"},
+		"a-purchase-order-request-form":	    {"table_id":"20009699","url":"purchase-order-approval/modules/purchase_order.form.html","name_for_search":""},
+        "a-purchase-order-email-to-accountant":	{"url":"purchase-order-approval/modules/purchase_order_email_to_accountant.html","name_for_search":""},
+
+		"a-purchase-order-approval":	        {"table_id":"20011183","url":"purchase-order-approval/modules/approving.html","name_for_search":"My purchase order approvings"},
+		"a-purchase-order-approval-info":		{"table_id":"20011183","url":"purchase-order-approval/modules/purchase-order-approval-info.html","name_for_search":"My purchase order approvings"},
+
+		"a-purchase-order-process":			{"table_id":"20011184","name_for_search":""},
+		"a-manager":		    			{"table_id":"20009687","name_for_search":""},
+        "a-accountant":	    				{"table_id":"20003837","name_for_search":""}
+	}
+}

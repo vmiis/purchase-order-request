@@ -1,0 +1,30 @@
+<div top-right-corner id=top_right_corner__ID class='d-none d-xl-block'>
+	<span id=database_p__ID><span style='color:green'>&#11044; </span>Connected to a private database<br></span>
+	<span id=database_d__ID><span style='color:red'>&#11044; </span>Connected to a public database<br></span>
+	<span id=username__ID></span>
+	<script>
+		if($vm.server=='development') $('#database_d__ID').show();
+		else if($vm.server=='production') $('#database_p__ID').show();
+	</script>
+	<style>
+		#top_right_corner__ID{
+			display:block;
+			position:fixed;
+			top:3px;
+			right:3px;
+			font-size:11px;
+			line-height:13px;
+			color:#fff;
+			z-index: 99999;
+		}
+		#username__ID{
+			float:right;
+		}
+		#database_d__ID{
+			display:none;
+		}
+		#database_p__ID{
+			display:none;
+		}
+	</style>
+</div>

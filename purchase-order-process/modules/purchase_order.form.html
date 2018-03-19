@@ -1,0 +1,98 @@
+<section>
+	<form id=F__ID>
+        <table id=tb__ID style='width:770px'>
+            <colgroup>
+				<col style='width:300px' />
+                <col />
+            </colgroup>
+
+			<tr><td colspan=2 class='header__ID'>Purchase Order</td></tr>
+			<tr id=record_id__ID><td>Purchase Order ID</td><td data-id=Purchase_Order_ID data-custom=1></td></tr>
+			<tr><td>Manager for Approval</td><td data-id=Manager_for_Approval></td></tr>
+			<tr><td>Short Description</td><td data-id=Short_Description></td></tr>
+			<tr><td>Supplier Account No (if applicable)</td><td data-id=Supplier_Account_No></td></tr>
+			<tr><td>Supplier Name</td><td data-id=Supplier_Name></td></tr>
+			<tr><td>Supplier Address</td><td data-id=Supplier_Address></td></tr>
+			<tr><td>Supplier Phone</td><td data-id=Supplier_Phone></td></tr>
+			<tr><td>Supplier Fax</td><td data-id=Supplier_Fax></td></tr>
+			<tr><td colspan=2 class='subheader__ID'>Purchase Order Items</td></tr>
+			<tr><td colspan=2>
+			    <table id=grid_item_a__ID></table>
+			    <table style='width:300px;float:right;border-collapse: collapse;'>
+			        <colgroup><col style='width:180px' /><col /></colgroup>
+			        <tr><td>GST Amount</td><td data-id='GST_Amount'></td></tr>
+			        <tr><td>Total Amount</td><td data-id='Total_Amount'></td></tr>
+			    </table>
+			</td></tr>
+        </table>
+    </form>
+</section>
+<script>
+    function F__ID(){
+        //----------------------------------
+        VmInclude:__PARTS__/grid/form.v3.js
+		VmInclude:__PARTS__/grid/grid_item_a.2.js
+        //----------------------------------
+        //---------------------------------------------
+        $('#D__ID').on('load',function(){
+            _init();
+            _field_process();
+            custom_field_process();
+
+			$('#save__ID').show();
+            if(_save_style=='none') $('#save__ID').hide();
+
+            //-------item a part
+			if(_records[I].items==undefined || typeof _records[I].items === 'string')  _records[I].items=[];
+			_item_a_records=_records[I].items; _item_a_render();
+            //-------
+			$('#F__ID td').removeAttr('contenteditable');
+        })
+        //----------------------------------
+        var custom_field_process=function(){
+            $('#tb__ID td[data-custom=1]').each(function(){
+                var field=$(this).attr('data-id');
+                switch(field){
+					case 'Purchase_Order_ID':
+						$('#record_id__ID').hide();
+						if(_records[I].UID!=undefined){
+							$('#record_id__ID').show();
+							$(this).text(_records[I].UID)
+						}
+						break;
+                }
+            })
+        }
+        //----------------------------------
+        _before_submit_form=function(){
+            return true;
+        }
+        //----------------------------------
+
+
+		//----------------------------------
+        //item a part
+        _item_a_fields="Description,Unit_Price,Quantity,GST,Amount";
+        //----------------------------------
+        _item_a_cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case "Amount":
+                    records[I].vm_readonly[field]=true;
+                    break;
+				case "GST":
+					td.html('<input disabled=true type=checkbox />');
+					VmInclude:__PARTS__/grid/field_checkbox.js
+                    break;
+            }
+        }
+        //----------------------------------
+        _item_a_before_submit=function(record,dbv){
+            return true;
+        }
+        //----------------------------------
+    }
+</script>
+<style>
+    VmInclude:__PARTS__/grid/form.css
+	VmInclude:__PARTS__/grid/grid_item_a.css
+</style>

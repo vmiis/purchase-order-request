@@ -1,0 +1,147 @@
+<section>
+    VmInclude:__COMPONENT__/grid/grid.v3.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__COMPONENT__/grid/grid.v3.js
+        _record_type='s2';
+        //-------------------------------------
+		_fields="_Form,Purchase_Order_ID,Short_Description";
+		_fields+=",_gridHidden|Manager_for_Approval"
+        _fields+=",_gridHidden|Account No (if applicable)|Supplier_Account_No"
+        _fields+=",_gridHidden|Supplier_Name"
+        _fields+=",_gridHidden|Supplier_Address"
+        _fields+=",_gridHidden|Supplier_Phone"
+        _fields+=",_gridHidden|Supplier_Fax"
+        _fields+=",GST_Amount,Total_Amount,_Approved_by,_Processed_by"
+		_fields+=",_Hidden|items,_Hidden|u_s_e_r_A,_Hidden|u_s_e_r_B"
+        _fields+=",Submit Date|DateTime,Submitted by|Author";
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            _set_req(); _request_data();
+        })
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+				case 'Purchase_Order_ID':
+                    records[I].vm_readonly[field]=true;
+					if(records[I].UID!=undefined) td.text(records[I].UID)
+                    break;
+				case '_Approved_by':
+                    records[I].vm_custom[field]=true;
+                    if(records[I].user2!=undefined && records[I].user2!=''){
+                        td.html("<u style='cursor:pointer'>"+records[I].user2+' on '+records[I].date2.split(' ')[0]+"</u>");
+                        td.find('u').on('click',function(){
+                            $vm.nav_load_module(prefix+'a-purchase-order-approval-info','',{record:records[I]});
+                        });
+                    }
+                    /*
+					records[I].vm_custom[field]=true;
+					if(records[I].user2!=undefined && records[I].user2!=''){
+						td.text(records[I].user2+' on '+records[I].date2.split(' ')[0])
+					}
+                    */
+					break;
+				case '_Processed_by':
+                    records[I].vm_custom[field]=true;
+                    if(records[I].user3!=undefined && records[I].user3!=''){
+                        td.html("<u style='cursor:pointer'>"+records[I].user3+' on '+records[I].date3.split(' ')[0]+"</u>");
+                        td.find('u').on('click',function(){
+                            $vm.nav_load_module(prefix+'p-purchase-order-process-info','',{record:records[I]});
+                        });
+                    }
+                    else if(records[I].user2!=undefined && records[I].user2!=''){
+                        td.html("<u style='cursor:pointer'>Processing</u>");
+                        td.find('u').on('click',function(){
+                            $vm.nav_load_module(prefix+'p-purchase-order-process','',{record:records[I],user2:records[I].user2,date2:records[I].date2});
+                        });
+                    }
+                    break;
+                    /*
+                    records[I].vm_custom[field]=true;
+					if(records[I].user3!=undefined && records[I].user3!=''){
+						td.text(records[I].user3+' on '+records[I].date3.split(' ')[0])
+					}
+                    else if(records[I].user2!=undefined && records[I].user2!=''){
+						td.html("<u style='cursor:pointer'>Processing</u>");
+						td.find('u').on('click',function(){
+                            $vm.nav_load_module(prefix+'p-purchase-order-process','',{record:records[I]});
+                            /*
+							var r=confirm("Are you sure that you have processed this purchase order?")
+							if(r==true){
+								//_records[I].ID=undefined;
+								//_records[I].vm_dirty=1;
+								//$('#save__ID').triggerHandler('click');
+                                //alert(_records[I].user2)
+                                processing(I);
+							}
+						});
+					}
+                    break;
+                    */
+				case 'Short_Description':
+                case 'GST_Amount':
+                case 'Total_Amount':
+                    records[I].vm_custom[field]=true;
+                    break;
+            }
+        }
+        //-------------------------------------
+        /*
+        _before_submit=function(record,dbv){
+            dbv.S1=record.Short_Description;
+            dbv.V1=record.Total_Amount;
+            dbv.V2=record.GST_Amount;
+			dbv.PPID=record.PID2;
+			dbv.PUID=record.UID2;
+            return true;
+        };
+        */
+        //-------------------------------------
+        var processing=function(I){
+            var record=_records[I];
+			var txt="Requested by "+record.Author+' on '+record.DateTime+'\r\n';
+			txt+="Approved by "+record.user2+' on '+$vm.date2+'\r\n\r\n';
+            txt+="Processed by "+$vm.user+' on '+$vm.date_to_string_dmy($vm.date_today())+'\r\n\r\n';
+            //txt+=make_approved_info(record);
+            var data={}
+			data.u_s_e_r_A=record.Author;
+			data.u_s_e_r_B=record.user2;
+            data.Short_Description=record.Short_Description;
+            data.Info=txt;
+            var dbv={S1:record.Short_Description};
+            dbv.PPID=request_tid;
+            dbv.PUID=record.UID;
+            var db_pid=process_tid;
+            var req={cmd:"add_json_record",db_pid:db_pid,data:data,dbv:dbv};
+            alert(JSON.stringify(data))
+            alert(JSON.stringify(dbv))
+            $VmAPI.request({data:req,callback:function(res){
+	            //$vm.nav_load_module(prefix+'a-purchase-order-email-to-accountant',$vm.root_layout_content_slot,{record:record})
+                _set_req(); _request_data();
+            }});
+        };
+        //-------------------------------------
+		$('#new__ID').hide();
+		$('#save__ID').hide();
+		var prefix=$vm.module_list[$vm.vm["__ID"].name].prefix;
+		var request_tid=_mlist[prefix+'p-purchase-order-request'].table_id;
+		var approval_tid=_mlist[prefix+'p-purchase-order-approval'].table_id;
+		var process_tid=_mlist[prefix+'p-purchase-order-process'].table_id;
+		var sql0="with tb1 as (select Information,ID,PID,UID,DateTime,Author,RowNum=row_number() over (order by ID DESC) from [TABLE-"+request_tid+"-@S1])";
+		sql0+=",tb2 as (select user2=Author,date2=DateTime,PPID2=PPID,PUID2=PUID from [TABLE-"+approval_tid+"])";
+		sql0+=",tb3 as (select user3=Author,date3=DateTime,PPID3=PPID,PUID3=PUID from [TABLE-"+process_tid+"])";
+		sql0+=",tb as (select UID,Information,ID,DateTime,Author,RowNum,user2,date2,user3,date3 from tb1 left join tb2 on PPID2=PID and PUID2=UID left join tb3 on PPID3=PID and PUID3=UID) "
+		//-------------------------------------
+		_set_req=function(){
+			var sql=sql0+"select UID,Information,ID,DateTime,Author,date2,user2,date3,user3 from tb where RowNum between @I6 and @I7";
+			var sql_n="select count(ID) from [TABLE-"+request_tid+"]";
+            _req={cmd:'query_records',sql:sql,sql_n:sql_n,s1:'"'+$('#keyword__ID').val()+'"',I:$('#I__ID').text(),page_size:$('#page_size__ID').val()}
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.v3.css
+</style>

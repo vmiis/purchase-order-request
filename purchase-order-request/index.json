@@ -1,0 +1,13 @@
+{
+    "modules":
+	{
+        "r-purchase-order-request":	          {"table_id":"20009699","url":"purchase-order-request/modules/purchase_order.html","form_module":"r-purchase-order-request-form","name_for_search":"My purchase order requests"},
+		"r-purchase-order-request-form":      {"table_id":"20009699","url":"purchase-order-request/modules/purchase_order.form.html","name_for_search":""},
+        "r-purchase-order-email-to-manager":  {"url":"purchase-order-request/modules/purchase_order_email_to_manager.html","name_for_search":""},
+
+		"r-purchase-order-approval":		{"table_id":"20011183","name_for_search":""},
+		"r-purchase-order-process":			{"table_id":"20011184","name_for_search":""},
+		"r-manager":		    			{"table_id":"20009687","name_for_search":""},
+        "r-accountant":	    				{"table_id":"20003837","name_for_search":""}
+	}
+}

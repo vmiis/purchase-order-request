@@ -1,0 +1,108 @@
+<section>
+    VmInclude:__COMPONENT__/grid/grid.v3.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__COMPONENT__/grid/grid.v3.js
+		_record_type='s2';
+		$('#save__ID').hide();
+        //-------------------------------------
+        _fields="_Form,Purchase_Order_ID,Short_Description";
+		_fields+=",_gridHidden|Manager_for_Approval"
+		_fields+=",_gridHidden|Accountant_for_Processing"
+        _fields+=",_gridHidden|Account No (if applicable)|Supplier_Account_No"
+        _fields+=",_gridHidden|Supplier_Name"
+        _fields+=",_gridHidden|Supplier_Address"
+        _fields+=",_gridHidden|Supplier_Phone"
+        _fields+=",_gridHidden|Supplier_Fax"
+        _fields+=",GST_Amount,Total_Amount,_Approved_by,_Processed_by"
+		_fields+=",_Hidden|items,_Hidden|u_s_e_r_A,_Hidden|u_s_e_r_B"
+        _fields+=",Submit Date|DateTime,Submitted by|Author,_Delete";
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            _set_req(); _request_data();
+        })
+        //-------------------------------------
+        _cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+				case 'Purchase_Order_ID':
+                    records[I].vm_readonly[field]=true;
+					if(records[I].UID!=undefined) td.text(records[I].UID)
+                    break;
+                case '_Approved_by':
+                    records[I].vm_custom[field]=true;
+					if(records[I].user2!=undefined && records[I].user2!=''){
+						td.text(records[I].user2+' on '+records[I].date2.split(' ')[0])
+					}
+                    break;
+				case '_Processed_by':
+                    records[I].vm_custom[field]=true;
+					if(records[I].user3!=undefined && records[I].user3!=''){
+						td.text(records[I].user3+' on '+records[I].date3.split(' ')[0])
+					}
+                    break;
+                case 'GST_Amount':
+                case 'Total_Amount':
+                    records[I].vm_custom[field]=true;
+                    break;
+            }
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+			if(record.user2!='' && record.user2!=undefined){
+				alert("You can not modify this record because the purchase order has been approved.")
+				return false;
+			}
+			record.u_s_e_r_A=$vm.user;
+			record.u_s_e_r_B=record.Manager_for_Approval.split('/').pop();
+            dbv.S1=record.Short_Description;
+            dbv.V1=record.Total_Amount;
+            dbv.V2=record.GST_Amount;
+            return true;
+        };
+        //-------------------------------------
+		_after_submit=function(I,res,type,dbv){
+			if($vm.g_purchase_order_for_approval_submit_button=='alert'){
+            	$vm.nav_load_module(prefix+'r-purchase-order-email-to-manager',$vm.root_layout_content_slot,{record:_records[I]})
+			}
+        };
+        //-------------------------------------
+		var prefix=$vm.module_list[$vm.vm["__ID"].name].prefix;
+		var request_tid=$vm.module_list[prefix+'r-purchase-order-request'].table_id;
+		var approval_tid=$vm.module_list[prefix+'r-purchase-order-approval'].table_id;
+		var process_tid=$vm.module_list[prefix+'r-purchase-order-process'].table_id;
+		var sql0="with tb1 as (select Information,ID,PID,UID,DateTime,Author,RowNum=row_number() over (order by ID DESC) from [TABLE-"+request_tid+"-@S1])";
+		sql0+=",tb2 as (select user2=Author,date2=DateTime,PID2=PID,UID2=UID,PPID2=PPID,PUID2=PUID from [TABLE-"+approval_tid+"])";
+		sql0+=",tb3 as (select user3=Author,date3=DateTime,PID3=PID,UID3=UID,PPID3=PPID,PUID3=PUID from [TABLE-"+process_tid+"])";
+		sql0+=",tb as (select UID,Information,ID,DateTime,Author,RowNum ,user2,date2,user3,date3 from tb1 left join tb2 on PPID2=PID and PUID2=UID left join tb3 on PPID3=PID and PUID3=UID) "
+		//-------------------------------------
+        _set_req=function(){
+			var sql=sql0+"select UID,Information,ID,DateTime,Author,date2,user2,user3,date3 from tb where RowNum between @I6 and @I7";
+			var sql_n="select count(ID) from [TABLE-"+request_tid+"]";
+            _req={cmd:'query_records_A',sql:sql,sql_n:sql_n,s1:'"'+$('#keyword__ID').val()+'"',I:$('#I__ID').text(),page_size:$('#page_size__ID').val()}
+        }
+        //-------------------------------------
+        _data_process_after_render=function(sr){
+            if(sr=='grid'){
+                $('#grid__ID tr').each(function(){
+                    var Approved_by="";
+                    var _Delete="";
+                    $(this).find('td').each(function(){
+                        var col = $(this).parent().children().index($(this));
+                        var column_name=$('#grid__ID th:nth-child('+(col+1)+')').attr('data-header');
+                        if(column_name=='_Approved_by') Approved_by=$(this);
+                        if(column_name=='_Delete') _Delete=$(this);
+                    })
+                    if(Approved_by!="" && Approved_by.html()!=''){
+                        if(_Delete!="") _Delete.html('');
+                    }
+                })
+            }
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/grid.v3.css
+</style>

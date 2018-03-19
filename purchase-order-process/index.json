@@ -1,0 +1,12 @@
+{
+    "modules":
+	{
+		"p-purchase-order-request":	          	{"table_id":"20009699","url":"purchase-order-process/modules/purchase_order.html","form_module":"p-purchase-order-request-form","name_for_search":"My purchase order approvals"},
+		"p-purchase-order-request-form":	    {"table_id":"20009699","url":"purchase-order-process/modules/purchase_order.form.html","name_for_search":""},
+
+		"p-purchase-order-process":	        	{"table_id":"20011184","url":"purchase-order-process/modules/processing.html","name_for_search":"My purchase order approvings"},
+		"p-purchase-order-process-info":		{"table_id":"20011184","url":"purchase-order-process/modules/purchase-order-process-info.html","name_for_search":"My purchase order approvings"},
+
+		"p-purchase-order-approval":		{"table_id":"20011183","name_for_search":""}
+	}
+}

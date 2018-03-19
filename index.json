@@ -1,0 +1,13 @@
+{
+	"api_path_development":"https://cbs.wappsystem.com/dev/",
+	"api_path_production":"https://cbs.wappsystem.com/dev/",
+	"default_production":"No",
+	"panels":{
+		"website":{"url":"","modules":["website/index.json",
+			"purchase-order-request/index.json",
+			"purchase-order-approval/index.json",
+			"purchase-order-process/index.json",
+			"administrator/index.json"
+		]}
+	}
+}

@@ -1,0 +1,7 @@
+{
+    "modules":
+	{
+		"administrator-purchase-order-request-approvement":  {"table_id":"20011183","url":"administrator/signature/purchase-order-request-approvement.html","name_for_search":"Purchase order request approvement"},
+		"administrator-purchase-order-request-processing":   {"table_id":"20011184","url":"administrator/signature/purchase-order-request-processing.html","name_for_search":"Purchase order request processing"}
+	}
+}

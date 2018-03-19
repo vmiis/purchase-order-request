@@ -1,0 +1,40 @@
+<section>
+    <div style='padding:30px'>
+        <br><br>
+        <div id=contents__ID>
+            <span id=info__ID></span>
+            <br><br>
+        </div>
+    </div>
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+		var record;
+		var prefix=$vm.module_list[$vm.vm["__ID"].name].prefix;
+		var request_tid=$vm.module_list[prefix+'p-purchase-order-request'].table_id;
+		var info_tid=$vm.module_list[prefix+'p-purchase-order-process-info'].table_id;
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+			record=$vm.vm['__ID'].op.input.record;
+			var uid=record.UID;
+			var sql="select Information from [TABLE-"+info_tid+"] where PUID=@I1";
+			$VmAPI.request({data:{cmd:'query_records_A',sql:sql,i1:uid},callback:function(res){
+				if(res.records.length>0){
+					var txt=res.records[0].Info;
+					$('#info__ID').html(txt.replace(/\r\n/g,'<br>'));
+				}
+			}})
+        })
+        //-------------------------------------
+		//-------------------------------------
+    }
+</script>
+<style>
+	#D__ID{
+		height:100%;
+		overflow:auto;
+		animation: vm_module_fadein 1.0s;
+		background-color: #fff;
+	}
+</style>

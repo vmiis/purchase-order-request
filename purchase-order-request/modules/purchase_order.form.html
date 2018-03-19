@@ -1,0 +1,215 @@
+<section>
+	<button id=save__ID type=button style='display:none'>Save</button>
+	<div class=container style="padding-top:30px">
+		<form id=F__ID>
+	        <table id=tb__ID style='width:770px'>
+	            <colgroup>
+					<col style='width:300px' />
+	                <col />
+	            </colgroup>
+
+				<tr><td colspan=2 class='header__ID'>Purchase Order</td></tr>
+				<tr id=record_id__ID><td>Purchase Order ID</td><td data-id=Purchase_Order_ID data-custom=1></td></tr>
+				<tr><td>Manager for Approval</td><td data-id=Manager_for_Approval data-custom=1></td></tr>
+				<tr><td>Accountant for Processing</td><td data-id=Accountant_for_Processing data-custom=1></td></tr>
+				<tr><td>Short Description</td><td data-id=Short_Description></td></tr>
+				<tr><td>Supplier Account No (if applicable)</td><td data-id=Supplier_Account_No></td></tr>
+				<tr><td>Supplier Name</td><td data-id=Supplier_Name></td></tr>
+				<tr><td>Supplier Address</td><td data-id=Supplier_Address></td></tr>
+				<tr><td>Supplier Phone</td><td data-id=Supplier_Phone></td></tr>
+				<tr><td>Supplier Fax</td><td data-id=Supplier_Fax></td></tr>
+				<tr><td colspan=2 class='subheader__ID'>Purchase Order Items</td></tr>
+				<tr><td colspan=2>
+				    <u style='cursor:pointer' id=add_an_item__ID>Add an item</u>
+				    <table id=grid_item_a__ID></table>
+				    <table style='width:300px;float:right;border-collapse: collapse;'>
+				        <colgroup><col style='width:180px' /><col /></colgroup>
+				        <tr><td>GST Amount</td><td data-id='GST_Amount'></td></tr>
+				        <tr><td>Total Amount</td><td data-id='Total_Amount'></td></tr>
+				    </table>
+				</td></tr>
+	        </table>
+			<br>
+			<button id=submit__ID type="submit" style='display:none'></button>
+			<button id=submit1__ID type="button" class="btn btn-secondary">Submit (draft)</button>
+			<button id=submit2__ID type="button" class="btn btn-secondary">Submit (completed, send alert email to the manager for approval</button>
+	    </form>
+	</div>
+</section>
+<script>
+    function F__ID(){
+        //----------------------------------
+        VmInclude:__COMPONENT__/grid/form.v3.js
+		VmInclude:__COMPONENT__/grid/grid_item_a.2.js
+        //----------------------------------
+		var prefix=$vm.module_list[$vm.vm["__ID"].name].prefix;
+		//get manager list;
+        var list_managers='';
+        var list_m_sql="select Name=S1,Email=S2,Login_Name=S3 from [TABLE-"+_mlist[prefix+"r-manager"].table_id+"]";
+        var req_m={cmd:'query_records',sql:list_m_sql};
+		var list_accountants='';
+        var list_a_sql="select Name=S1,Email=S2,Login_Name=S3 from [TABLE-"+_mlist[prefix+"r-accountant"].table_id+"]";
+        var req_a={cmd:'query_records',sql:list_a_sql};
+        jQuery.ajaxSetup({async:false});
+        $VmAPI.request({data:req_m,callback:function(res){
+            if(res.records.length>0){
+                list_managers='';
+                for(var i=0;i<res.records.length;i++){
+                    if(list_managers!='') list_managers+=','
+                    list_managers+=res.records[i].Name+";"+res.records[i].Name+"/"+res.records[i].Email+"/"+res.records[i].Login_Name;
+                }
+            }
+        }});
+		$VmAPI.request({data:req_a,callback:function(res){
+            if(res.records.length>0){
+                list_accountants='';
+                for(var i=0;i<res.records.length;i++){
+                    if(list_accountants!='') list_accountants+=','
+                    list_accountants+=res.records[i].Name+";"+res.records[i].Name+"/"+res.records[i].Email+"/"+res.records[i].Login_Name;
+                }
+            }
+        }});
+        jQuery.ajaxSetup({async:true});
+        //---------------------------------------------
+        $('#D__ID').on('load',function(){
+            _init();
+            _field_process();
+            custom_field_process();
+
+			$('#submit1__ID').show();
+			$('#submit2__ID').show();
+			if(_records[I].Approved_by!="" && _records[I].Approved_by!=undefined){
+				$('#submit1__ID').hide();
+				$('#submit2__ID').hide();
+			}
+
+            //-------item a part
+			if(_records[I].items==undefined || typeof _records[I].items === 'string')  _records[I].items=[];
+			_item_a_records=_records[I].items; _item_a_render();
+            //-------
+        })
+        //----------------------------------
+        var custom_field_process=function(){
+            $('#tb__ID td[data-custom=1]').each(function(){
+                var field=$(this).attr('data-id');
+                switch(field){
+					case 'Purchase_Order_ID':
+						$('#record_id__ID').hide();
+						if(_records[I].UID!=undefined){
+							$('#record_id__ID').show();
+							$(this).text(_records[I].UID)
+						}
+						break;
+					case 'Manager_for_Approval':
+	                    var html="<select style='border:0;width:100%'></select>";
+	                    _records[I].vm_custom[field]=true;
+	                    $(this).html(html)
+	                    $vm.set_dropdown_list_from_text($(this).find('select'),list_managers);
+	                    $(this).find('select').val(_records[I][field])
+						$(this).find('select').on('change', function(){
+	                        _set_value($(this).val(),_records,I,field);
+	                    });
+	                    break;
+					case 'Accountant_for_Processing':
+	                    var html="<select style='border:0;width:100%'></select>";
+	                    _records[I].vm_custom[field]=true;
+	                    $(this).html(html)
+	                    $vm.set_dropdown_list_from_text($(this).find('select'),list_accountants);
+	                    $(this).find('select').val(_records[I][field])
+						$(this).find('select').on('change', function(){
+	                        _set_value($(this).val(),_records,I,field);
+	                    });
+	                    break;
+						/*
+					case "Client":
+                        $(this).find("input[name='"+field+"']").val(_records[I].Client);
+                        $(this).find("input[name='"+field+"_uid']").val(_records[I].Client_uid);
+                    	break;
+					case "xxx":
+                    	break;
+						*/
+                }
+            })
+        }
+        //----------------------------------
+
+		//----------------------------------
+        //item a part
+        _item_a_fields="Description,Unit_Price,Quantity,GST,Amount,_Remove";
+        //----------------------------------
+        $('#add_an_item__ID').on('click',function(){ _item_a_add(); })
+        //----------------------------------
+        _item_a_cell_render=function(records,I,field,td,set_value,source){
+            switch(field){
+                case "Amount":
+                    records[I].vm_readonly[field]=true;
+                    break;
+				case "GST":
+					td.html('<input type=checkbox />');
+					VmInclude:__COMPONENT__/grid/field_checkbox.js
+					td.find('input').on('change',function(){
+						_item_a_after_change(records,I,field,td,set_value,source);
+					})
+                    break;
+            }
+        }
+        //----------------------------------
+        _item_a_after_change=function(records,I,field,td,set_value,source){
+            switch(field){
+				case "Unit_Price":
+                case "Quantity":
+				case "GST":
+                    cal();
+                    break;
+            }
+        }
+        //----------------------------------
+        _item_a_after_remove=function(){
+            cal();
+        }
+        //----------------------------------
+        _item_a_before_submit=function(record,dbv){
+            return true;
+        }
+        //----------------------------------
+        var cal=function(){
+            var total=0,gst=0;
+            for(var i=0;i<_item_a_records.length;i++){
+                var p=parseFloat(_item_a_records[i].Unit_Price);
+                var q=parseFloat(_item_a_records[i].Quantity);
+                if(_item_a_records[i].Unit_Price=='') p=0;
+                if(_item_a_records[i].Quantity=='') q=0;
+                var a=p*q;
+				if(_item_a_records[i].GST=='1'){
+					gst+=a*0.1;
+					a=a*1.1;
+				}
+                _item_a_records[i].Amount=a.toFixed(2);
+                total+=a;
+            }
+            _records[I].GST_Amount=gst.toFixed(2);
+            _records[I].Total_Amount=total.toFixed(2);
+			_records[I].Balance=(_records[I].Total_Payment-_records[I].Total_Amount).toFixed(2);
+            _field_process();
+            _item_a_render();
+
+			_records[I].invoice_items=_item_a_records;
+        }
+        //----------------------------------
+		$('#submit1__ID').on('click',function(event){
+			$vm.g_purchase_order_for_approval_submit_button='no-alert'
+			$('#save__ID').trigger('click');
+		});
+		//--------------------------------------------------------
+		$('#submit2__ID').on('click',function(event){
+			$vm.g_purchase_order_for_approval_submit_button='alert'
+			$('#save__ID').trigger('click');
+		});
+		//--------------------------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__COMPONENT__/grid/form.css
+	VmInclude:__COMPONENT__/grid/grid_item_a.css
+	VmInclude:__COMPONENT__/grid/grid_item_b.css
+</style>

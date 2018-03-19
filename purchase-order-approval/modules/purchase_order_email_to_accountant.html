@@ -1,0 +1,90 @@
+<section>
+    <div style='padding:30px'>
+        <br><br>
+        <div id=contents__ID>
+            Dear <span id=manager__ID></span>,<br><br>
+            There is a new purchase order needs to be processed.
+            <br>
+            <br>
+            <span id=info__ID></span>
+            <br><br>
+            <br>Best Regards,
+            <br>Database Administrator
+        </div>
+        <br><br>
+        <input type=button id=send__ID value=Send class='btn btn-secondary' />
+    </div>
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        var record;
+        var manager;
+        var email="";
+		var prefix=$vm.module_list[$vm.vm["__ID"].name].prefix;
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            record=$vm.vm['__ID'].op.input.record;
+            var info=make_approved_info(record);
+            manager=record.Manager_for_Approval.split('/')[0];
+            email=record.Manager_for_Approval.split('/')[1];
+            $('#manager__ID').text(manager);
+			var txt="Requested by "+record.Author+' on '+record.DateTime+'\r\n';
+			txt+="Approved by "+$vm.user+' on '+$vm.date_to_string_dmy($vm.date_today())+'\r\n\r\n';
+			txt=txt.replace(/\r\n/g,'<br>');
+			$('#info__ID').html(txt+info);
+        })
+        //-------------------------------------
+        $('#send__ID').on('click',function(){
+     	   	var From_Address="noresponse@wappsystem.com";
+     		var From_Name="Database Administrator";
+     		var To=email;
+            if(To.length<5){
+                alert('No email address.')
+                return;
+            }
+     		var Title="Purchase order request";
+     		var Body=$('#contents__ID').html();
+            if($vm.user=='guest'){
+				$vm.alert('The alert email (to: '+To+') has been sent out');
+				$vm.nav_load_module(prefix+'a-purchase-order-request');
+				return;
+			}
+            $VmAPI.request({data:{cmd:'send_email',From_Address:From_Address,From_Name:From_Name,To:To,Title:Title,Body:Body},callback:function(res){
+                alert('The alert email (to: '+email+') has been sent out');
+				$vm.nav_load_module(prefix+'a-purchase-order-request');
+            }})
+        });
+        //-------------------------------------
+		var make_approved_info=function(record){
+			var key_list=",UID,Short_Description,Supplier_Name,Supplier_Address,Supplier_Phone,Supplier_Fax,GST_Amount,Total_Amount,";
+			var info='';
+			$.each(record,function(key,value){
+				var key1=key;
+				if(key1=='UID') key1="Purchase_Order_ID";
+				if(key_list.indexOf(','+key+',')!=-1) info+=key1.replace(/_/g,' ')+": "+value+"\r\n";
+			})
+			if(record.items!=undefined){
+				info+="\r\nItem Details:\r\n\r\n";
+				for(var i=0;i<record.items.length;i++){
+					var gst='GST:No'; if(record.items[i].GST=='1') gst='GST:Yes';
+					info+=record.items[i].Description+", "+record.items[i].Unit_Price+"(unit price), "+record.items[i].Quantity+"(quantity), "+gst+"\r\n";
+				}
+			}
+            info=info.replace(/\r\n/g,'<br>');
+            return info;
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    #D__ID{
+        background-color:#fff;
+    	color:#000;
+        font-size:14px;
+        font-family: Helvetica, Arial, sans-serif;
+    	height:100%;
+    	overflow: auto;
+    	animation: vm_module_fadein 1.0s;
+    }
+</style>

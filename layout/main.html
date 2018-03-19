@@ -1,0 +1,196 @@
+VmInclude:/layout/main.html.top-right-corner.html
+VmInclude:/layout/main.html.header.html
+VmInclude:/layout/main.html.content-container.html
+VmInclude:/layout/main.html.footer.html
+<div id="fb-root"></div>
+<div style='display:none'><div id="disqus_thread"></div></div>
+<script>$vm.comments=1;</script>
+<script main-layout-js>
+	function F__ID(){
+		var home_page_module='website_home';
+        console.log((new Date().getTime()-$vm.start_time).toString()+"---"+"********************* start running code in main.html ************************");
+		//------------------------------------
+		var website_item_list_for_search=[]
+		//------------------------------------
+		var set_height=function(){
+			var header_height=$('#brand__ID').outerHeight(); $vm.header_height=header_height;
+			var footer_height=$('#footer__ID').outerHeight();
+			$vm.min_height=($(window).height()-header_height-footer_height);
+			$('#content_container__ID').css({'height':$vm.min_height});
+			$('#content_container__ID').css({'top':header_height+'px'})
+		}
+		//------------------------------------
+		set_height();
+        $vm._nn=6;
+        function checkForChanges(){
+            set_height();
+            $vm._nn--; if($vm._nn==0) return;
+            setTimeout(checkForChanges, 300);
+        }
+        checkForChanges();
+		//------------------------------------
+		window.onresize=function(e){set_height();};
+		window.onmessage=function(e){
+		    if(e.data.username!=undefined && e.data.user_id!=undefined){
+		        $vm.user=e.data.username;
+		        $vm.user_id=e.data.user_id;
+		        $VmAPI.set_token(e.data.token,e.data.api_url,e.data.username,e.data.user_id,e.data.nickname);
+		        location.reload(true);
+		    }
+		};
+		//-----------------------------------------
+		//This is the place we can add background image to body (Asynchronous)
+		var $image1 = $("<img>");
+		$image1.on('load',(function(){ $('body').css("background", "url("+$(this).attr("src")+") no-repeat bottom center"); $('body').css("background-size", "cover");  }));
+		$image1.attr("src", "layout/main.html.background.jpg?v=2");
+		//------------------------------------
+		//over write vm alert
+		$vm.alert=function(msg){
+			$('#vm_alert_information div.modal-body').html( $('<div/>').html(msg).text() );
+			$("#vm_alert_information").modal();
+		}
+        $vm.close_alert=function(){
+            $('#vm_alert_information').modal('hide');
+		}
+		//------------------------------------
+		var set_module_search=function(){
+			$("#vm_system_search").autocomplete({
+				minLength:0,
+				source: function(request, response) {
+					var results=$.ui.autocomplete.filter(website_item_list_for_search, request.term);
+					response(results.slice(0, 10));
+				},
+				select: function(event,ui) {
+					event.preventDefault();
+					$('.navbar-collapse').collapse('hide');
+					$("#vm_system_search").val('');
+					$("#vm_system_search").blur();
+					$('.ui-helper-hidden-accessible').html('');
+					$vm.nav_load_module(ui.item.value);
+				}
+			});
+			$("#vm_system_search").focus(function(){$("#vm_system_search").autocomplete("search","");});
+		}
+		//------------------------------------
+		var load_home_module=function(){
+            console.log((new Date().getTime()-$vm.start_time).toString()+"---"+"*********************** loading home module... **************************")
+			var a=window.location.href.split('module=');
+			if(a.length!=2)	$vm.nav_load_module(home_page_module);
+			else{
+				var name=a[1].split('&')[0];
+				if(name.length>0){
+					if($vm.module_list[name]!=undefined){
+						$vm.nav_load_module(name);
+						return;
+					}
+				};
+				alert("The module "+name+" doesn't exist!");
+			}
+		}
+		//********************************************************
+		var N=0;
+		//------------------------------------
+		var add_config_modules_to_module_list_and_start=function(url,text,prefix){
+			var config;
+			try{ config=JSON.parse(text);}
+			catch (e){ alert("Error in config file\n"+e); return; }
+			var modules=config.modules;
+			for (var property in modules) {
+			   	if($vm.module_list[prefix+property]==undefined){
+				   	$vm.module_list[prefix+property]=modules[property];
+					if($vm.module_list[prefix+property].prefix!=undefined) $vm.module_list[prefix+property].prefix=prefix+$vm.module_list[prefix+property].prefix;
+                    else $vm.module_list[prefix+property].prefix=prefix;
+					var nm=$vm.module_list[prefix+property]['name_for_search'];
+					if(nm!=""){
+						if(nm==undefined) nm=property;
+						website_item_list_for_search.push({label:nm,value:prefix+property})
+					}
+					var m_url=$vm.module_list[prefix+property].url;
+					$vm.module_list[prefix+property].url=url.split('|')[0]+"/"+m_url;
+                    if(m_url!=undefined && (m_url.substring(0,7)=="http://" || m_url.substring(0,8)=="https://") ) $vm.module_list[prefix+property].url=m_url;
+			   	}
+			}
+			N--;
+			if(N==0){
+				$vm.search_list=1;
+				load_home_module();
+			}
+		}
+		//------------------------------------
+		var process_config_file=function(url,prefix){
+			$.get(url.replace('|','/')+'?_='+$vm.ver[1]+$vm.reload,function(data){
+				localStorage.setItem(url+"_txt",data);
+				localStorage.setItem(url+"_ver",$vm.ver[1]);
+				add_config_modules_to_module_list_and_start(url,data,prefix);
+			},'text').fail(function() {
+				//alert( "The configuration file ("+url.replace('|','/')+") doesn't exist!" );
+				console.log("The configuration file ("+url.replace('|','/')+") doesn't exist!")
+			});
+		}
+		//------------------------------------
+		//read all module's info from json files
+		var panels=$vm.app_config.panels;
+		for (var property in panels){
+			var json_files=panels[property].modules;
+			N=N+json_files.length;
+		}
+		for (var property in panels){
+			$vm.module_list[property]={"url":panels[property].url}
+			var prefix=property+"_";
+			$vm.module_list[property].prefix=prefix;
+			var json_files=panels[property].modules;
+			for(var i=0;i<json_files.length;i++){
+				var url=$vm.url(json_files[i]);
+				//if(json_files[i].indexOf('https://')==-1) url=$vm.hosting_path+"|"+url;
+                if(json_files[i].indexOf('https://')==-1){
+                    if(json_files[i].indexOf('|')==-1)   url=$vm.hosting_path+"|"+url;
+                    else                                 url=$vm.hosting_path+"/"+url;
+                }
+				var ver=localStorage.getItem(url+"_ver");
+				var txt=localStorage.getItem(url+"_txt");
+				if(ver!=$vm.ver[1] || txt===null || $vm.debug===true || $vm.reload!=''){
+					process_config_file(url,prefix);
+				}
+				else{
+                    add_config_modules_to_module_list_and_start(url,txt,prefix);
+                }
+			}
+		}
+		//********************************************************
+		var search_loop=setInterval(function (){
+			if($vm.js_jquery_ui==1 && $vm.search_list==1){
+				clearInterval(search_loop);
+				set_module_search();
+                console.log((new Date().getTime()-$vm.start_time).toString()+"---"+"********************* search module is ready ************************");
+			}
+		},100);
+		//------------------------------------
+	}
+</script>
+<style main-layout-css>
+    .vm_module{
+        position:absolute;
+        width:100%;
+        height:100%;
+    }
+	html,body{
+		height:100%;
+		overflow-y:hidden;
+	}
+	@keyframes vm_module_fadein {
+		from { opacity:0; }
+		to {opacity:1;}
+	}
+    @keyframes vm_module_slide_in {
+		from { margin-top:50%; }
+		to {margin-top:0;}
+	}
+    @keyframes vm_module_slide_out {
+        from { margin-top:0; }
+		to {margin-top:-50%;}
+	}
+    .ui-autocomplete.ui-menu{font-size:12px}
+	.ui-menu-item .ui-menu-item-wrapper:hover{
+		font-weight:normal;
+	}
+</style>
